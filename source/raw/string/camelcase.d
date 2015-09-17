@@ -6,7 +6,11 @@ import std.regex;
 //enum re = ctRegex!(`([A-Z][a-z0-9]+)|([A-Za-z][A-Za-z0-9]+)_?|([a-z0-9]+[A-Z][a-z0-9]+)`);
 enum re = ctRegex!(`[A-Z][^A-Z]*|[A-Za-z][^A-Z_]*`);
 
-auto toCamelCase(string str) {
+auto toCamelCase(string str)
+out {
+	assert(str !is null && str.length > 0);
+}
+body {
 	import std.array;
 	//import std.uni : asUpperCase;
 	import std.ascii : isLower, toUpper; // NOTE: work around missing asUpperCase in gdc
@@ -24,25 +28,30 @@ auto toCamelCase(string str) {
 
 			if (c.isLower) {
 				if (lastWasUnderScore || i==0) {
-					stringBuilder.put(c.toUpper);
+					stringBuilder ~= c.toUpper;
 				} else {
-					stringBuilder.put(c);
+					stringBuilder ~= c;
 				}
 			} else {
-				stringBuilder.put(c);
+				stringBuilder ~= c;
 			}
 			lastWasUnderScore = false;
 		}
 	} else {
 		auto matches = matchAll(str, re);
 		foreach (match; matches) {
-			//stringBuilder.put(match[0][0..1].asUpperCase);
-			stringBuilder.put(match[0][0].toUpper); // NOTE: work around missing asUpperCase in gdc
-			stringBuilder.put(match[0][1..$]);
+			//stringBuilder ~= match[0][0..1].asUpperCase);
+			stringBuilder ~= match[0][0].toUpper; // NOTE: work around missing asUpperCase in gdc
+			stringBuilder ~= match[0][1..$];
 			//writefln("done m:%s pre:%s post:%s hit:%s", match, match.pre, match.post, match.hit);
 		}
 	}
-	return stringBuilder.data;
+	auto data = stringBuilder.data;
+	if (data !is null && data.length > 0) {
+		return data;
+	} else {
+		return str; // just return original if we didn't add any characters
+	}
 }
 
 
