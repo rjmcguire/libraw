@@ -1,6 +1,6 @@
 module raw.var.definition;
 
-struct Var(PrimaryT = int) {
+struct var(PrimaryT = int) {
 private:
 	TypeInfo currentType;
 	static string genHolders() {
@@ -65,13 +65,9 @@ public:
 	mixin(genAliasThis());
 }
 
-auto var(T = int)(T value = T.init) {
-	return Var!T();
-}
-
 unittest {
 	import std.stdio;
-	auto v = var();
+	auto v = var!()();
 	v = 1234;
 	assert(v.toString == "1234");
 	assert(v.get!string == "1234");
